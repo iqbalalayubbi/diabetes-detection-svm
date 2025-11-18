@@ -1,0 +1,179 @@
+<!-- ...existing code... -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Diabetes Prediction UI</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1000px;
+        margin: 32px auto;
+        padding: 0 18px;
+      }
+      h2 {
+        margin-bottom: 8px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        align-items: start;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+      }
+      label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        font-size: 0.95rem;
+      }
+      input[type="text"],
+      input[type="number"],
+      select {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+      button {
+        margin-top: 16px;
+        padding: 10px 16px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 6px;
+      }
+      .result {
+        margin-top: 18px;
+        padding: 12px;
+        border-radius: 6px;
+      }
+      .success {
+        background: #e6ffed;
+        border: 1px solid #8ee2a1;
+      }
+      .error {
+        background: #ffe6e6;
+        border: 1px solid #ff8e8e;
+      }
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 520px) {
+        .grid {
+          grid-template-columns: repeat(1, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Form Prediksi Diabetes</h2>
+
+    <form id="predict-form">
+      {% if fields %}
+      <div class="grid">
+        {% for f in fields %}
+        <div class="field">
+          <label for="{{ f }}">{{ f }}</label>
+
+          {% if f|lower == 'age' %}
+          <!-- Age sebagai input number -->
+          <input
+            class="feature-input"
+            id="{{ f }}"
+            name="{{ f }}"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="Masukkan umur (tahun)"
+          />
+          {% elif f|lower == 'gender' %}
+          <!-- Semua fitur selain age sebagai pilihan Yes/No -> 1/0 -->
+          <select class="feature-input" id="{{ f }}" name="{{ f }}">
+            <option value="0">Female</option>
+            <option value="1">Male</option>
+          </select>
+          {% else %}
+          <!-- Semua fitur selain age sebagai pilihan Yes/No -> 1/0 -->
+          <select class="feature-input" id="{{ f }}" name="{{ f }}">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <button type="submit">Prediksi</button>
+      {% else %}
+      <p>
+        Tidak ada daftar fitur tersedia. Pastikan model memiliki
+        <code>feature_order</code>.
+      </p>
+      {% endif %}
+    </form>
+
+    <div id="output"></div>
+
+    <script>
+      document
+        .getElementById("predict-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const inputs = document.querySelectorAll(".feature-input");
+          const payload = {};
+          inputs.forEach((inp) => {
+            const name = inp.name;
+            if (inp.tagName.toLowerCase() === "select") {
+              // select -> value "0" atau "1" -> gunakan integer
+              payload[name] = parseInt(inp.value, 10);
+              return;
+            }
+            // number input for age -> parse as integer if possible
+            const raw = inp.value.trim();
+            if (raw === "") return; // skip empty
+            const n = Number(raw);
+            if (!isNaN(n)) {
+              payload[name] =
+                raw.indexOf(".") !== -1 ? parseFloat(raw) : parseInt(raw, 10);
+            } else {
+              payload[name] = raw;
+            }
+          });
+
+          const out = document.getElementById("output");
+          out.innerHTML = '<div class="result">Mengirim permintaan...</div>';
+
+          try {
+            const resp = await fetch("/predict", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const data = await resp.json();
+            if (resp.ok && data.success) {
+              out.innerHTML = `<div class="result success"><strong>Hasil:</strong> ${
+                data.prediction
+              } <br/><strong>Confidence:</strong> ${(
+                data.confidence || 0
+              ).toFixed(3)} <br/><strong>Saran:</strong> ${
+                data.suggestion
+              }</div>`;
+            } else {
+              out.innerHTML = `<div class="result error"><strong>Error:</strong> ${
+                data.error || JSON.stringify(data)
+              }</div>`;
+            }
+          } catch (err) {
+            out.innerHTML = `<div class="result error"><strong>Request gagal:</strong> ${err}</div>`;
+          }
+        });
+    </script>
+  </body>
+</html>
+<!-- ...existing code... -->

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import joblib
 import pandas as pd
@@ -131,7 +131,7 @@ def predict():
         print(f"All input values: {data}")
 
         # Simpan ke database dengan informasi tambahan
-        save_prediction(data, pred, prediction_id, prediction_text, confidence)
+        # save_prediction(data, pred, prediction_id, prediction_text, confidence)
 
         return jsonify({
             "success": True,
@@ -153,6 +153,11 @@ def history():
     for r in records:
         r["_id"] = str(r["_id"])
     return jsonify(records)
+
+@app.route("/predict-ui", methods=["GET"])
+def predict_ui():
+    fields = feature_order if feature_order is not None else []
+    return render_template("predict_ui.html", fields=fields)
 
 # Run Server
 if __name__ == "__main__":
