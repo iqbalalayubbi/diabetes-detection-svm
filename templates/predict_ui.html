@@ -46,6 +46,25 @@
         cursor: pointer;
         border-radius: 6px;
       }
+      .loading-row {
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+      }
+      .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #ccc;
+        border-top-color: #007bff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 10px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
       .result {
         margin-top: 18px;
         padding: 12px;
@@ -77,32 +96,42 @@
     <form id="predict-form">
       {% if fields %}
       <div class="grid">
-        {% for f in fields %}
+        {% for f in fields %} {# Siapkan nama payload dengan kapitalisasi sesuai
+        contoh yang diminta #} {% set lname = f|lower %} {% if lname == 'age' %}
+        {% set payload_name = 'Age' %} {% elif lname == 'gender' %} {% set
+        payload_name = 'Gender' %} {% else %} {% set payload_name = f %} {%
+        endif %} {# Sanitasi id: ganti spasi dengan underscore #} {% set
+        element_id = payload_name.replace(' ', '_') %}
         <div class="field">
-          <label for="{{ f }}">{{ f }}</label>
+          <label for="{{ element_id }}">{{ payload_name }}</label>
 
-          {% if f|lower == 'age' %}
-          <!-- Age sebagai input number -->
+          {% if lname == 'age' %}
           <input
             class="feature-input"
-            id="{{ f }}"
-            name="{{ f }}"
+            id="{{ element_id }}"
+            name="{{ payload_name }}"
             type="number"
             min="0"
             step="1"
             placeholder="Masukkan umur (tahun)"
           />
-          {% elif f|lower == 'gender' %}
-          <!-- Semua fitur selain age sebagai pilihan Yes/No -> 1/0 -->
-          <select class="feature-input" id="{{ f }}" name="{{ f }}">
-            <option value="0">Female</option>
-            <option value="1">Male</option>
+          {% elif lname == 'gender' %}
+          <select
+            class="feature-input"
+            id="{{ element_id }}"
+            name="{{ payload_name }}"
+          >
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
           </select>
           {% else %}
-          <!-- Semua fitur selain age sebagai pilihan Yes/No -> 1/0 -->
-          <select class="feature-input" id="{{ f }}" name="{{ f }}">
-            <option value="0">No</option>
-            <option value="1">Yes</option>
+          <select
+            class="feature-input"
+            id="{{ element_id }}"
+            name="{{ payload_name }}"
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
           </select>
           {% endif %}
         </div>
@@ -128,26 +157,33 @@
           const inputs = document.querySelectorAll(".feature-input");
           const payload = {};
           inputs.forEach((inp) => {
-            const name = inp.name;
+            const name = inp.name; // gunakan name sebagai key persis (bisa mengandung spasi)
             if (inp.tagName.toLowerCase() === "select") {
-              // select -> value "0" atau "1" -> gunakan integer
-              payload[name] = parseInt(inp.value, 10);
+              // Kirim nilai string persis (Male/Female, Yes/No)
+              payload[name] = inp.value;
               return;
             }
-            // number input for age -> parse as integer if possible
+            // Age sebagai number
             const raw = inp.value.trim();
-            if (raw === "") return; // skip empty
+            if (raw === "") return;
             const n = Number(raw);
             if (!isNaN(n)) {
-              payload[name] =
-                raw.indexOf(".") !== -1 ? parseFloat(raw) : parseInt(raw, 10);
+              payload[name] = Number.isInteger(n)
+                ? parseInt(raw, 10)
+                : parseFloat(raw);
             } else {
-              payload[name] = raw;
+              payload[name] = raw; // fallback kalau bukan number
             }
           });
 
           const out = document.getElementById("output");
-          out.innerHTML = '<div class="result">Mengirim permintaan...</div>';
+          // Disable submit button and show spinner
+          const submitBtn = document.querySelector(
+            '#predict-form button[type="submit"]'
+          );
+          if (submitBtn) submitBtn.disabled = true;
+          out.innerHTML =
+            '<div class="result"><div class="loading-row"><div class="spinner"></div><span>Mengirim permintaan...</span></div></div>';
 
           try {
             const resp = await fetch("/predict", {
@@ -156,14 +192,14 @@
               body: JSON.stringify(payload),
             });
             const data = await resp.json();
-            if (resp.ok && data.success) {
-              out.innerHTML = `<div class="result success"><strong>Hasil:</strong> ${
-                data.prediction
-              } <br/><strong>Confidence:</strong> ${(
-                data.confidence || 0
-              ).toFixed(3)} <br/><strong>Saran:</strong> ${
-                data.suggestion
-              }</div>`;
+            if (
+              resp.ok &&
+              (data.success === true || data.class_predict !== undefined)
+            ) {
+              // Dukungan kedua format respons
+              const textPred =
+                data.prediction || data.class_predict || "Tidak tersedia";
+              out.innerHTML = `<div class="result success"><strong>Hasil:</strong> ${textPred}</div>`;
             } else {
               out.innerHTML = `<div class="result error"><strong>Error:</strong> ${
                 data.error || JSON.stringify(data)
@@ -172,6 +208,8 @@
           } catch (err) {
             out.innerHTML = `<div class="result error"><strong>Request gagal:</strong> ${err}</div>`;
           }
+          // Re-enable button
+          if (submitBtn) submitBtn.disabled = false;
         });
     </script>
   </body>
