@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Deteksi Dini Risiko Diabetes Melitus</title>
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --bg: #f3f4f6;
+        --text: #111827;
+        --muted: #6b7280;
+        --card-bg: #ffffff;
+        --danger: #b91c1c;
+        --radius-lg: 16px;
+        --radius-md: 10px;
+        --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      body {
+        background: radial-gradient(
+          circle at top left,
+          #e0f2fe 0,
+          #f3f4f6 45%,
+          #f9fafb 100%
+        );
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(10px);
+        background: rgba(248, 250, 252, 0.85);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      .nav {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 0.03em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .logo-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #2563eb, #22c55e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.85rem;
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 18px;
+        font-size: 0.9rem;
+      }
+
+      .nav-links a {
+        color: var(--muted);
+        padding-bottom: 2px;
+        border-bottom: 2px solid transparent;
+        transition: 0.2s;
+      }
+
+      .nav-links a:hover {
+        color: var(--text);
+        border-bottom-color: var(--primary);
+      }
+
+      .nav-cta {
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: var(--primary);
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      }
+
+      .nav-cta:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px rgba(37, 99, 235, 0.4);
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 20px 40px;
+      }
+
+      /* Hero section */
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+        gap: 40px;
+        align-items: center;
+        min-height: 100vh;
+        padding: 8px 0 64px;
+        position: relative;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 140px;
+        background: linear-gradient(
+          to bottom,
+          rgba(243, 244, 246, 0) 0%,
+          rgba(243, 244, 246, 1) 70%
+        );
+        pointer-events: none;
+      }
+
+      @media (max-width: 800px) {
+        .hero {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .hero-title {
+        font-size: clamp(2.3rem, 4.2vw, 3.2rem); /* enlarged */
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        line-height: 1.15;
+        margin-bottom: 14px;
+      }
+
+      .hero-highlight {
+        background: linear-gradient(120deg, #2563eb, #22c55e);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .hero-subtitle {
+        color: var(--muted);
+        font-size: 0.98rem;
+        margin-bottom: 18px;
+        max-width: 520px;
+      }
+
+      .hero-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        background: rgba(37, 99, 235, 0.07);
+        color: #1e3a8a;
+        border-radius: 999px;
+        font-size: 0.75rem;
+      }
+
+      .badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #22c55e;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .scroll-indicator {
+        position: absolute;
+        left: 50%;
+        bottom: 24px;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.7rem;
+        letter-spacing: 0.15em;
+        color: #475569;
+        animation: fadeIn 1.2s ease 0.4s both;
+      }
+      .scroll-indicator .chevron {
+        width: 50px;
+        height: 50px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(224, 224, 224, 0.85);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        cursor: pointer;
+        animation: bounce 1.8s infinite;
+      }
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.9s cubic-bezier(0.21, 0.68, 0.29, 1.01),
+          transform 0.9s cubic-bezier(0.21, 0.68, 0.29, 1.01);
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .btn-primary {
+        padding: 11px 22px;
+        border-radius: 999px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 600;
+        box-shadow: 0 10px 22px rgba(37, 99, 235, 0.4);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 16px 28px rgba(37, 99, 235, 0.45);
+      }
+
+      .btn-secondary {
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        background: rgba(255, 255, 255, 0.8);
+        color: #0f172a;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-secondary:hover {
+        background: #f9fafb;
+      }
+
+      .hero-note {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .hero-card {
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.22) 0%,
+          rgba(255, 255, 255, 0.08) 60%,
+          rgba(255, 255, 255, 0.04) 100%
+        );
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-radius: var(--radius-lg);
+        padding: 26px 26px 22px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        box-shadow: 0 6px 28px rgba(15, 23, 42, 0.14),
+          0 2px 8px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+      }
+      .hero-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.55) 0%,
+          rgba(255, 255, 255, 0.15) 45%,
+          rgba(255, 255, 255, 0.05) 75%
+        );
+        pointer-events: none;
+        mix-blend-mode: overlay;
+      }
+      .hero-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background: radial-gradient(
+          circle at top left,
+          rgba(255, 255, 255, 0.75),
+          rgba(255, 255, 255, 0) 70%
+        );
+        pointer-events: none;
+        opacity: 0.6;
+      }
+      .hero-card-title {
+        position: relative;
+      }
+      .hero-card-sub {
+        position: relative;
+      }
+
+      .hero-card-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .hero-card-sub {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+
+      .risk-pill-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+      }
+
+      .risk-pill {
+        flex: 0 0 auto; /* biarkan ukuran alami, jangan paksa stretch */
+        min-width: 140px; /* tambahkan lebar minimum agar teks muat satu baris */
+        padding: 9px 14px;
+        border-radius: 999px;
+        background: #f9fafb;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.8rem;
+        white-space: nowrap; /* cegah wrapping */
+      }
+      .risk-pill span {
+        white-space: nowrap;
+      }
+
+      .risk-pill span:last-child {
+        font-weight: 600;
+      }
+
+      .risk-pill.high {
+        border-color: rgba(185, 28, 28, 0.4);
+        background: #fef2f2;
+        color: #7f1d1d;
+      }
+
+      .risk-pill.low {
+        border-color: rgba(34, 197, 94, 0.4);
+        background: #ecfdf3;
+        color: #166534;
+      }
+
+      .hero-mini-list {
+        list-style: none;
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+
+      .hero-mini-list li {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+      }
+
+      .mini-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 999px;
+        background: #9ca3af;
+      }
+
+      .disclaimer-small {
+        font-size: 0.7rem;
+        color: #9ca3af;
+      }
+
+      /* Sections */
+      section {
+        margin-bottom: 32px;
+      }
+
+      .section-header {
+        margin-bottom: 16px;
+      }
+
+      .section-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 3px 9px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        background: rgba(255, 255, 255, 0.6);
+        color: #4b5563;
+      }
+
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-top: 6px;
+        margin-bottom: 4px;
+      }
+
+      .section-desc {
+        font-size: 0.9rem;
+        color: var(--muted);
+        max-width: 680px;
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        margin-top: 8px;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        padding: 14px 16px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        font-size: 0.88rem;
+      }
+
+      .card h3 {
+        font-size: 0.98rem;
+        margin-bottom: 6px;
+      }
+
+      .card p {
+        font-size: 0.86rem;
+        color: var(--muted);
+      }
+
+      .card ul {
+        padding-left: 18px;
+        font-size: 0.86rem;
+        color: var(--muted);
+      }
+
+      .card ul li {
+        margin-bottom: 4px;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 0.75rem;
+      }
+
+      .tag {
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        background: #f9fafb;
+      }
+
+      .two-column {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      @media (max-width: 900px) {
+        .two-column {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .list-check {
+        list-style: none;
+        font-size: 0.88rem;
+        color: var(--muted);
+      }
+
+      .list-check li {
+        margin-bottom: 6px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .check-icon {
+        font-size: 0.9rem;
+        margin-top: 2px;
+      }
+
+      .cta-bottom {
+        margin-top: 20px;
+        text-align: center;
+        padding: 16px 14px;
+        border-radius: var(--radius-md);
+        border: 1px dashed rgba(148, 163, 184, 0.8);
+        background: rgba(255, 255, 255, 0.85);
+      }
+
+      .cta-bottom p {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+      }
+
+      .cta-bottom button {
+        margin-top: 4px;
+      }
+
+      footer {
+        border-top: 1px solid rgba(148, 163, 184, 0.3);
+        margin-top: 24px;
+        padding-top: 14px;
+        padding-bottom: 18px;
+        font-size: 0.78rem;
+        color: #9ca3af;
+        text-align: center;
+      }
+
+      footer p {
+        margin-bottom: 4px;
+      }
+
+      footer span.disclaimer {
+        display: block;
+        max-width: 720px;
+        margin: 0 auto;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <div class="logo">
+          <!-- <div class="logo-icon">DM</div> -->
+          <span>Diabetes Risk Checker</span>
+        </div>
+        <div class="nav-links">
+          <a href="#tentang-diabetes">Tentang Diabetes</a>
+          <a href="#deteksi-dini">Deteksi Dini</a>
+          <a href="#cara-kerja">Cara Kerja</a>
+          <a href="#penelitian">Penelitian</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero">
+        <div>
+          <h1 class="hero-title">
+            Sistem
+            <span class="hero-highlight"
+              >Deteksi Dini Risiko Diabetes Melitus</span
+            >
+            Berbasis SVM
+          </h1>
+          <p class="hero-subtitle">
+            Bantu mengenali risiko diabetes lebih awal dengan memanfaatkan model
+            <strong>Support Vector Machine</strong> yang dilatih dari data
+            klinis pasien.
+          </p>
+
+          <div class="hero-badges">
+            <div class="badge">
+              <span class="badge-dot"></span>
+              <span>Machine Learning untuk Kesehatan</span>
+            </div>
+            <div class="badge">
+              <span
+                >Berbasis penelitian klasifikasi SVM &amp; Random Forest</span
+              >
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <!-- Ubah href dengan url_for kalau pakai template Jinja -->
+            <a href="/predict-ui">
+              <button class="btn-primary">
+                Cek Risiko Diabetes Sekarang
+                <span>→</span>
+              </button>
+            </a>
+            <a href="#tentang-diabetes">
+              <button class="btn-secondary">Pelajari tentang Diabetes</button>
+            </a>
+          </div>
+
+          <p class="hero-note">
+            *Hasil sistem ini bukan diagnosis medis resmi. Selalu konsultasikan
+            dengan tenaga kesehatan profesional.
+          </p>
+        </div>
+
+        <aside class="hero-card" aria-label="Ringkasan risiko simulasi">
+          <div class="hero-card-title">Ringkasan Risiko (Simulasi)</div>
+          <div class="hero-card-sub">
+            Contoh distribusi risiko berdasarkan data yang telah dianalisis.
+          </div>
+
+          <div class="risk-pill-row">
+            <div class="risk-pill high">
+              <span>Risiko Tinggi</span>
+              <span>32%</span>
+            </div>
+            <div class="risk-pill">
+              <span>Risiko Sedang</span>
+              <span>21%</span>
+            </div>
+            <div class="risk-pill low">
+              <span>Risiko Rendah</span>
+              <span>47%</span>
+            </div>
+          </div>
+
+          <ul class="hero-mini-list">
+            <li>
+              <span class="mini-dot"></span>
+              <span
+                >Faktor utama: kadar glukosa, pola buang air kecil, dan
+                penurunan berat badan.</span
+              >
+            </li>
+            <li>
+              <span class="mini-dot"></span>
+              <span
+                >Model SVM digunakan untuk mengklasifikasikan risiko berdasarkan
+                pola data pasien.</span
+              >
+            </li>
+          </ul>
+
+          <p class="disclaimer-small">
+            Angka di atas hanya contoh tampilan. Prediksi aktual akan dihitung
+            berdasarkan data yang Anda masukkan.
+          </p>
+        </aside>
+        <div
+          class="scroll-indicator"
+          onclick="document.getElementById('tentang-diabetes').scrollIntoView({behavior:'smooth'})"
+        >
+          <div class="chevron">↓</div>
+          <span>SCROLL</span>
+        </div>
+      </section>
+
+      <!-- TENTANG DIABETES -->
+      <section id="tentang-diabetes" class="reveal">
+        <div class="section-header">
+          <div class="section-badge">
+            <span>Informasi Dasar</span>
+          </div>
+          <h2 class="section-title">Apa itu Diabetes Melitus?</h2>
+          <p class="section-desc">
+            Diabetes Melitus adalah gangguan metabolik kronis yang ditandai
+            dengan tingginya kadar gula (glukosa) dalam darah. Kondisi ini dapat
+            terjadi ketika tubuh tidak menghasilkan cukup insulin atau tidak
+            dapat menggunakan insulin secara efektif. Jika tidak dikendalikan,
+            diabetes dapat menyebabkan komplikasi serius seperti gangguan
+            jantung, ginjal, saraf, dan penglihatan.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>Jenis-Jenis Diabetes</h3>
+            <ul>
+              <li>
+                <strong>Diabetes Tipe 1:</strong> tubuh hampir tidak memproduksi
+                insulin.
+              </li>
+              <li>
+                <strong>Diabetes Tipe 2:</strong> tubuh kurang sensitif terhadap
+                insulin atau produksinya tidak cukup.
+              </li>
+              <li>
+                <strong>Diabetes Gestasional:</strong> diabetes yang muncul saat
+                kehamilan.
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Gejala yang Sering Dirasakan</h3>
+            <ul>
+              <li>Sering buang air kecil (poliuria)</li>
+              <li>Rasa haus yang berlebihan</li>
+              <li>Rasa lapar yang meningkat</li>
+              <li>Penurunan berat badan tanpa sebab jelas</li>
+              <li>Rasa lelah berkepanjangan</li>
+              <li>Luka sulit sembuh atau sering infeksi</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Komplikasi Jangka Panjang</h3>
+            <p>
+              Tanpa pengelolaan yang baik, diabetes dapat berujung pada penyakit
+              jantung, kerusakan ginjal, kerusakan saraf, gangguan penglihatan,
+              hingga risiko amputasi. Karena itu, deteksi dan penanganan dini
+              sangat penting untuk mencegah komplikasi lebih lanjut.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- DETEKSI DINI -->
+      <section id="deteksi-dini" class="reveal">
+        <div class="section-header">
+          <div class="section-badge">
+            <span>Deteksi Dini</span>
+          </div>
+          <h2 class="section-title">
+            Mengapa Deteksi Dini Risiko Diabetes Penting?
+          </h2>
+          <p class="section-desc">
+            Deteksi dini memungkinkan seseorang untuk mengetahui risiko diabetes
+            sebelum muncul komplikasi serius. Dengan mengetahui risikonya lebih
+            cepat, perubahan pola hidup dan pemeriksaan lanjutan dapat dilakukan
+            sedini mungkin.
+          </p>
+        </div>
+
+        <div class="two-column">
+          <div>
+            <ul class="list-check">
+              <li>
+                <span class="check-icon">✔</span>
+                <span
+                  >Membantu mencegah komplikasi berat seperti gagal ginjal,
+                  serangan jantung, dan stroke.</span
+                >
+              </li>
+              <li>
+                <span class="check-icon">✔</span>
+                <span
+                  >Memberi kesempatan untuk memperbaiki pola makan, aktivitas
+                  fisik, dan kebiasaan sehari-hari.</span
+                >
+              </li>
+              <li>
+                <span class="check-icon">✔</span>
+                <span
+                  >Meningkatkan kesadaran akan kondisi kesehatan pribadi.</span
+                >
+              </li>
+              <li>
+                <span class="check-icon">✔</span>
+                <span
+                  >Dapat menjadi dasar untuk berkonsultasi lebih lanjut dengan
+                  tenaga kesehatan profesional.</span
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>Faktor Risiko yang Dinilai Sistem</h3>
+            <p>
+              Sistem ini memanfaatkan beberapa informasi kesehatan yang umum
+              dikaitkan dengan risiko diabetes, antara lain:
+            </p>
+            <ul>
+              <li>Usia</li>
+              <li>Pola buang air kecil (poliuria)</li>
+              <li>Rasa haus yang berlebihan</li>
+              <li>Penurunan berat badan secara tiba-tiba</li>
+              <li>Tingkat kelelahan</li>
+              <li>Riwayat infeksi jamur pada area kelamin (genital thrush)</li>
+              <li>Dan faktor klinis/gejala lain sesuai form isian</li>
+            </ul>
+            <div class="tag-row">
+              <span class="tag">Gejala Klinis</span>
+              <span class="tag">Faktor Usia</span>
+              <span class="tag">Riwayat Kesehatan</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARA KERJA SISTEM -->
+      <section id="cara-kerja" class="reveal">
+        <div class="section-header">
+          <div class="section-badge">
+            <span>Cara Kerja Sistem</span>
+          </div>
+          <h2 class="section-title">Bagaimana Sistem Ini Bekerja?</h2>
+          <p class="section-desc">
+            Sistem deteksi dini ini memanfaatkan model klasifikasi berbasis
+            <strong>Support Vector Machine (SVM)</strong> yang telah dilatih
+            menggunakan data pasien dengan berbagai variabel kesehatan. Berikut
+            alur kerjanya:
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>1. Input Data Kesehatan</h3>
+            <p>
+              Pengguna mengisi form berisi informasi terkait gejala dan faktor
+              risiko, seperti gejala klinis, usia, dan riwayat tertentu. Data
+              ini akan menjadi masukan (input) bagi model machine learning.
+            </p>
+          </article>
+
+          <article class="card">
+            <h3>2. Pemrosesan oleh Model SVM</h3>
+            <p>
+              Data yang diinput akan diproses oleh model SVM yang telah dilatih
+              menggunakan dataset pasien diabetes. Model ini mempelajari pola
+              hubungan antara gejala dan label risiko diabetes
+              (positif/negatif).
+            </p>
+          </article>
+
+          <article class="card">
+            <h3>3. Prediksi Risiko</h3>
+            <p>
+              Berdasarkan pola yang telah dipelajari, model memberikan prediksi
+              apakah profil data pengguna cenderung termasuk kategori berisiko
+              diabetes atau tidak. Hasil ini berupa kelas (misalnya: “berisiko”
+              atau “tidak berisiko”).
+            </p>
+          </article>
+
+          <article class="card">
+            <h3>4. Tampilan Hasil &amp; Edukasi</h3>
+            <p>
+              Sistem menampilkan hasil prediksi disertai penjelasan singkat dan
+              saran langkah selanjutnya, seperti menjaga pola makan,
+              meningkatkan aktivitas fisik, atau berkonsultasi dengan tenaga
+              kesehatan.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- PENELITIAN -->
+      <section id="penelitian" class="reveal">
+        <div class="section-header">
+          <div class="section-badge">
+            <span>Dasar Ilmiah</span>
+          </div>
+          <h2 class="section-title">Latar Belakang Penelitian</h2>
+          <p class="section-desc">
+            Sistem ini dikembangkan dengan mengacu pada penelitian yang
+            membandingkan metode
+            <strong>Support Vector Machine (SVM)</strong> dan
+            <strong>Random Forest</strong> dalam melakukan klasifikasi deteksi
+            dini risiko diabetes melitus berdasarkan data pasien.
+          </p>
+        </div>
+
+        <div class="two-column">
+          <div class="card">
+            <h3>Ringkasan Penelitian</h3>
+            <p>
+              Penelitian menggunakan dataset pasien dengan beberapa variabel
+              penjelas yang merepresentasikan gejala dan faktor risiko diabetes.
+              Model SVM dan Random Forest dilatih dan diuji untuk
+              mengklasifikasikan apakah seorang pasien termasuk kategori positif
+              diabetes atau tidak.
+            </p>
+            <p style="margin-top: 6px">
+              Hasil penelitian menunjukkan bahwa kedua metode tersebut memiliki
+              performa yang baik untuk deteksi awal risiko diabetes, sehingga
+              relevan untuk diimplementasikan dalam bentuk sistem berbasis web
+              seperti yang digunakan pada aplikasi ini.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Catatan Penting</h3>
+            <ul>
+              <li>
+                Model machine learning membantu memberikan estimasi risiko,
+                bukan diagnosis akhir.
+              </li>
+              <li>
+                Penggunaan sistem ini sebaiknya menjadi pelengkap, bukan
+                pengganti pemeriksaan medis.
+              </li>
+              <li>
+                Interpretasi hasil harus tetap mempertimbangkan konteks klinis
+                dan pemeriksaan lanjutan.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      // Intersection Observer untuk efek reveal
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add("visible");
+              observer.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+      document
+        .querySelectorAll(".reveal")
+        .forEach((sec) => observer.observe(sec));
+    </script>
+
+    <footer>
+      <p>© 2025 – Sistem Deteksi Dini Risiko Diabetes Melitus Berbasis SVM.</p>
+      <span class="disclaimer">
+        Disclaimer: Sistem ini dibuat untuk keperluan edukasi dan pendukung
+        pembelajaran. Hasil klasifikasi tidak dapat digunakan sebagai dasar
+        diagnosis medis. Silakan konsultasikan kepada dokter atau tenaga
+        kesehatan profesional untuk pemeriksaan lebih lanjut.
+      </span>
+    </footer>
+  </body>
+</html>

@@ -196,6 +196,11 @@ def predict_ui():
     fields = feature_order if feature_order is not None else []
     return render_template("predict_ui.html", fields=fields)
 
+# Landing Page
+@app.route("/", methods=["GET"])
+def index():
+    return render_template("index.html")
+
 # Run Server
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))

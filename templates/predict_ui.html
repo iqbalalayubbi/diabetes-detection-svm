@@ -1,61 +1,228 @@
-<!-- ...existing code... -->
 <!DOCTYPE html>
-<html>
+<html lang="id">
   <head>
     <meta charset="utf-8" />
-    <title>Diabetes Prediction UI</title>
+    <title>Form Prediksi Diabetes – Diabetes Risk Checker</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 1000px;
-        margin: 32px auto;
-        padding: 0 18px;
+      :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --bg: #f3f4f6;
+        --text: #111827;
+        --muted: #6b7280;
+        --glass-border: rgba(255, 255, 255, 0.45);
+        --danger: #dc2626;
+        --success-bg: #e6ffed;
+        --error-bg: #ffe6e6;
       }
-      h2 {
-        margin-bottom: 8px;
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      body {
+        background: radial-gradient(
+          circle at top left,
+          #e0f2fe 0,
+          #f3f4f6 45%,
+          #f9fafb 100%
+        );
+        color: var(--text);
+        line-height: 1.55;
+        padding-bottom: 40px;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(12px);
+        background: rgba(248, 250, 252, 0.9);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+      }
+      .nav {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        font-weight: 700;
+        font-size: 1.05rem;
+        letter-spacing: 0.03em;
+      }
+      .nav-links {
+        display: flex;
+        gap: 18px;
+        font-size: 0.85rem;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        padding-bottom: 3px;
+        border-bottom: 2px solid transparent;
+        transition: 0.2s;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--text);
+        border-bottom-color: var(--primary);
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 20px 0;
+      }
+      .page-title {
+        font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 6px;
+      }
+      .page-sub {
+        color: var(--muted);
+        font-size: 0.95rem;
+        max-width: 640px;
+        margin-bottom: 24px;
+      }
+      .form-card {
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.25) 0%,
+          rgba(255, 255, 255, 0.14) 60%,
+          rgba(255, 255, 255, 0.08) 100%
+        );
+        backdrop-filter: blur(18px) saturate(170%);
+        -webkit-backdrop-filter: blur(18px) saturate(170%);
+        border: 1px solid var(--glass-border);
+        border-radius: 18px;
+        padding: 26px 26px 24px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12),
+          0 4px 10px rgba(15, 23, 42, 0.06);
+      }
+      .form-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          140deg,
+          rgba(255, 255, 255, 0.55) 0%,
+          rgba(255, 255, 255, 0.15) 50%,
+          rgba(255, 255, 255, 0.05) 80%
+        );
+        pointer-events: none;
+        mix-blend-mode: overlay;
+      }
+      .form-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .form-header h2 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .badge-small {
+        padding: 4px 9px;
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+        border-radius: 999px;
+        background: rgba(37, 99, 235, 0.08);
+        color: #1e3a8a;
+        border: 1px solid rgba(37, 99, 235, 0.25);
       }
       .grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-        align-items: start;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
       }
       .field {
         display: flex;
         flex-direction: column;
       }
-      label {
+      .field label {
         font-weight: 600;
         margin-bottom: 6px;
-        font-size: 0.95rem;
+        font-size: 0.78rem;
+        letter-spacing: 0.02em;
+        color: #0f172a;
       }
-      input[type="text"],
-      input[type="number"],
-      select {
+      .field input[type="number"],
+      .field select {
         width: 100%;
-        padding: 8px;
-        box-sizing: border-box;
-        border-radius: 4px;
-        border: 1px solid #ccc;
+        padding: 9px 10px;
+        font-size: 0.8rem;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        background: rgba(255, 255, 255, 0.9);
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
       }
-      button {
-        margin-top: 16px;
-        padding: 10px 16px;
-        font-size: 16px;
+      .field input:focus,
+      .field select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+      }
+      .actions {
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        padding: 11px 20px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
         cursor: pointer;
-        border-radius: 6px;
+        box-shadow: 0 10px 22px rgba(37, 99, 235, 0.35);
+        transition: 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 16px 30px rgba(37, 99, 235, 0.45);
+      }
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        padding: 11px 18px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        color: #0f172a;
+        backdrop-filter: blur(6px);
+      }
+      .btn-secondary:hover {
+        background: #f1f5f9;
       }
       .loading-row {
         display: flex;
         align-items: center;
-        font-size: 0.95rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
       }
       .spinner {
         width: 24px;
         height: 24px;
-        border: 3px solid #ccc;
-        border-top-color: #007bff;
+        border: 3px solid #cbd5e1;
+        border-top-color: var(--primary);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin-right: 10px;
@@ -66,89 +233,196 @@
         }
       }
       .result {
-        margin-top: 18px;
-        padding: 12px;
-        border-radius: 6px;
+        margin-top: 22px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        font-size: 0.82rem;
+        line-height: 1.4;
       }
       .success {
-        background: #e6ffed;
-        border: 1px solid #8ee2a1;
+        background: var(--success-bg);
+        border: 1px solid #4ade80;
+        color: #065f46;
       }
       .error {
-        background: #ffe6e6;
-        border: 1px solid #ff8e8e;
+        background: var(--error-bg);
+        border: 1px solid #f87171;
+        color: #7f1d1d;
       }
-      @media (max-width: 900px) {
-        .grid {
-          grid-template-columns: repeat(2, 1fr);
+      footer {
+        margin-top: 40px;
+        font-size: 0.65rem;
+        text-align: center;
+        color: var(--muted);
+      }
+      .disclaimer-banner {
+        margin: 38px auto 0;
+        max-width: 880px;
+        padding: 14px 18px 13px;
+        border: 1px solid rgba(185, 28, 28, 0.35);
+        background: linear-gradient(
+          135deg,
+          rgba(254, 242, 242, 0.95) 0%,
+          rgba(255, 255, 255, 0.92) 70%
+        );
+        color: #7f1d1d;
+        border-radius: 14px;
+        font-size: 0.72rem;
+        line-height: 1.35;
+        position: relative;
+        box-shadow: 0 6px 22px rgba(185, 28, 28, 0.15),
+          0 2px 6px rgba(0, 0, 0, 0.04);
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .disclaimer-banner::before {
+        content: "!";
+        width: 26px;
+        height: 26px;
+        flex: 0 0 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #dc2626;
+        color: #fff;
+        font-weight: 700;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        box-shadow: 0 3px 10px rgba(220, 38, 38, 0.4);
+        letter-spacing: 0.02em;
+      }
+      .disclaimer-banner strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.74rem;
+      }
+      .disclaimer-banner a {
+        color: #b91c1c;
+        font-weight: 600;
+        text-decoration: underline;
+      }
+      .disclaimer-banner a:hover {
+        text-decoration: none;
+      }
+      @media (max-width: 560px) {
+        .disclaimer-banner {
+          font-size: 0.7rem;
+          padding: 12px 14px;
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .disclaimer-banner::before {
+          margin-bottom: 6px;
         }
       }
-      @media (max-width: 520px) {
-        .grid {
-          grid-template-columns: repeat(1, 1fr);
+      @media (max-width: 720px) {
+        .page-title {
+          font-size: clamp(1.9rem, 5vw, 2.2rem);
         }
       }
     </style>
   </head>
   <body>
-    <h2>Form Prediksi Diabetes</h2>
-
-    <form id="predict-form">
-      {% if fields %}
-      <div class="grid">
-        {% for f in fields %} {# Siapkan nama payload dengan kapitalisasi sesuai
-        contoh yang diminta #} {% set lname = f|lower %} {% if lname == 'age' %}
-        {% set payload_name = 'Age' %} {% elif lname == 'gender' %} {% set
-        payload_name = 'Gender' %} {% else %} {% set payload_name = f %} {%
-        endif %} {# Sanitasi id: ganti spasi dengan underscore #} {% set
-        element_id = payload_name.replace(' ', '_') %}
-        <div class="field">
-          <label for="{{ element_id }}">{{ payload_name }}</label>
-
-          {% if lname == 'age' %}
-          <input
-            class="feature-input"
-            id="{{ element_id }}"
-            name="{{ payload_name }}"
-            type="number"
-            min="0"
-            step="1"
-            placeholder="Masukkan umur (tahun)"
-          />
-          {% elif lname == 'gender' %}
-          <select
-            class="feature-input"
-            id="{{ element_id }}"
-            name="{{ payload_name }}"
-          >
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-          {% else %}
-          <select
-            class="feature-input"
-            id="{{ element_id }}"
-            name="{{ payload_name }}"
-          >
-            <option value="No">No</option>
-            <option value="Yes">Yes</option>
-          </select>
-          {% endif %}
+    <header>
+      <nav class="nav">
+        <div class="logo">Diabetes Risk Checker</div>
+        <div class="nav-links">
+          <a href="/">Beranda</a>
+          <a href="/predict-ui" class="active">Prediksi</a>
         </div>
-        {% endfor %}
-      </div>
-
-      <button type="submit">Prediksi</button>
-      {% else %}
-      <p>
-        Tidak ada daftar fitur tersedia. Pastikan model memiliki
-        <code>feature_order</code>.
+      </nav>
+    </header>
+    <main>
+      <h1 class="page-title">Form Prediksi Risiko Diabetes</h1>
+      <p class="page-sub">
+        Isi data gejala dan faktor terkait untuk mendapatkan estimasi risiko
+        diabetes dari model klasifikasi <strong>SVM</strong>. Semua input selain
+        usia menggunakan pilihan Ya/Tidak atau Male/Female.
       </p>
-      {% endif %}
-    </form>
-
-    <div id="output"></div>
-
+      <div class="form-card">
+        <div class="form-header">
+          <h2>Data Gejala & Faktor</h2>
+          <span class="badge-small">PREDIKSI</span>
+        </div>
+        <form id="predict-form">
+          {% if fields %}
+          <div class="grid">
+            {% for f in fields %} {% set lname = f|lower %} {% if lname == 'age'
+            %}{% set payload_name = 'Age' %} {% elif lname == 'gender' %}{% set
+            payload_name = 'Gender' %} {% else %}{% set payload_name = f %}{%
+            endif %} {% set element_id = payload_name.replace(' ', '_') %}
+            <div class="field">
+              <label for="{{ element_id }}">{{ payload_name }}</label>
+              {% if lname == 'age' %}
+              <input
+                class="feature-input"
+                id="{{ element_id }}"
+                name="{{ payload_name }}"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Masukkan umur (tahun)"
+              />
+              {% elif lname == 'gender' %}
+              <select
+                class="feature-input"
+                id="{{ element_id }}"
+                name="{{ payload_name }}"
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+              {% else %}
+              <select
+                class="feature-input"
+                id="{{ element_id }}"
+                name="{{ payload_name }}"
+              >
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn-primary">
+              Prediksi Sekarang <span>→</span>
+            </button>
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="document.getElementById('predict-form').reset(); document.getElementById('output').innerHTML='';"
+            >
+              Reset
+            </button>
+          </div>
+          {% else %}
+          <p>
+            Tidak ada daftar fitur tersedia. Pastikan model memiliki
+            <code>feature_order</code>.
+          </p>
+          {% endif %}
+        </form>
+        <div id="output"></div>
+      </div>
+      <footer>
+        <div
+          class="disclaimer-banner"
+          role="alert"
+          aria-label="Peringatan penting"
+        >
+          <div class="disclaimer-text">
+            <strong>Disclaimer Penting:</strong>
+            Hasil prediksi ini <em>bukan</em> diagnosis medis resmi dan hanya
+            bersifat indikatif untuk edukasi awal. Selalu konsultasikan dengan
+            dokter atau tenaga kesehatan profesional untuk pemeriksaan,
+            interpretasi hasil laboratorium, dan penentuan terapi lanjutan.
+          </div>
+        </div>
+      </footer>
+    </main>
     <script>
       document
         .getElementById("predict-form")
@@ -157,13 +431,11 @@
           const inputs = document.querySelectorAll(".feature-input");
           const payload = {};
           inputs.forEach((inp) => {
-            const name = inp.name; // gunakan name sebagai key persis (bisa mengandung spasi)
+            const name = inp.name;
             if (inp.tagName.toLowerCase() === "select") {
-              // Kirim nilai string persis (Male/Female, Yes/No)
               payload[name] = inp.value;
               return;
             }
-            // Age sebagai number
             const raw = inp.value.trim();
             if (raw === "") return;
             const n = Number(raw);
@@ -172,19 +444,16 @@
                 ? parseInt(raw, 10)
                 : parseFloat(raw);
             } else {
-              payload[name] = raw; // fallback kalau bukan number
+              payload[name] = raw;
             }
           });
-
           const out = document.getElementById("output");
-          // Disable submit button and show spinner
           const submitBtn = document.querySelector(
             '#predict-form button[type="submit"]'
           );
           if (submitBtn) submitBtn.disabled = true;
           out.innerHTML =
             '<div class="result"><div class="loading-row"><div class="spinner"></div><span>Mengirim permintaan...</span></div></div>';
-
           try {
             const resp = await fetch("/predict", {
               method: "POST",
@@ -196,22 +465,19 @@
               resp.ok &&
               (data.success === true || data.class_predict !== undefined)
             ) {
-              // Dukungan kedua format respons
               const textPred =
                 data.prediction || data.class_predict || "Tidak tersedia";
-              out.innerHTML = `<div class="result success"><strong>Hasil:</strong> ${textPred}</div>`;
+              out.innerHTML = `<div class='result success'><strong>Hasil Prediksi:</strong> ${textPred}</div>`;
             } else {
-              out.innerHTML = `<div class="result error"><strong>Error:</strong> ${
+              out.innerHTML = `<div class='result error'><strong>Error:</strong> ${
                 data.error || JSON.stringify(data)
               }</div>`;
             }
           } catch (err) {
-            out.innerHTML = `<div class="result error"><strong>Request gagal:</strong> ${err}</div>`;
+            out.innerHTML = `<div class='result error'><strong>Request gagal:</strong> ${err}</div>`;
           }
-          // Re-enable button
           if (submitBtn) submitBtn.disabled = false;
         });
     </script>
   </body>
 </html>
-<!-- ...existing code... -->
