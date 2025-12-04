@@ -18,7 +18,7 @@ app = Flask(__name__)
 CORS(app)
 
 # 1. Load model dan artefak preprocessing
-saved = joblib.load("svm_model_v2.pkl")
+saved = joblib.load("svm_model_v3.pkl")
 svm = saved["model"]
 scalers = saved.get("scaler")
 encoders = saved.get("encoders")
