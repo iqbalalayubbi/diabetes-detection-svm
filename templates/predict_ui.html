@@ -249,6 +249,21 @@
         border: 1px solid #f87171;
         color: #7f1d1d;
       }
+      .positive {
+        background: #fff7ed;
+        border: 1px solid #fb923c;
+        color: #7c2d12;
+      }
+      .negative {
+        background: #ecfdf5;
+        border: 1px solid #34d399;
+        color: #064e3b;
+      }
+      .referral {
+        margin-top: 8px;
+        font-size: 0.8rem;
+        color: #7c2d12;
+      }
       footer {
         margin-top: 40px;
         font-size: 0.65rem;
@@ -463,11 +478,31 @@
             const data = await resp.json();
             if (
               resp.ok &&
-              (data.success === true || data.class_predict !== undefined)
+              (data.success === true ||
+                data.class_predict !== undefined ||
+                data.prediction !== undefined)
             ) {
-              const textPred =
-                data.prediction || data.class_predict || "Tidak tersedia";
-              out.innerHTML = `<div class='result success'><strong>Hasil Prediksi:</strong> ${textPred}</div>`;
+              const raw = (
+                data.prediction ??
+                data.class_predict ??
+                ""
+              ).toString();
+              const label = raw.trim().toLowerCase();
+              const isPositive = [
+                "positive",
+                "diabetes",
+                "1",
+                "yes",
+                "true",
+              ].includes(label);
+              const resultClass = isPositive ? "positive" : "negative";
+              const niceText = isPositive
+                ? "Diabetes (Positif)"
+                : "Tidak Diabetes (Negatif)";
+              const referral = isPositive
+                ? "<div class='referral'>Saran: Mohon segera berkonsultasi dengan dokter/tenaga kesehatan untuk pemeriksaan lebih lanjut dan penanganan yang sesuai.</div>"
+                : "";
+              out.innerHTML = `<div class='result ${resultClass}'><strong>Hasil Prediksi:</strong> ${niceText}${referral}</div>`;
             } else {
               out.innerHTML = `<div class='result error'><strong>Error:</strong> ${
                 data.error || JSON.stringify(data)
